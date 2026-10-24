@@ -10,6 +10,7 @@ const recreationRules = [
   'Keep the layout responsive on mobile. Omit the three decorative notes from the original reference.',
   'Put an Email button at the bottom right. Copy styled HTML plus these recreation rules to the clipboard and open an email to codefolio.work@gmail.com with subject re: Calling For Testcliff. The user pastes into the body and sends. No PDF or download.',
   'Email content is a static snapshot. Browser checkboxes and the add button belong to the recreated website, not the email. Custom fonts may fall back in email clients.',
+  'Make the puck a keyboard-accessible button with a hard bottom shadow and pointer cursor. It opens a small Notes dialog with a textarea and Save button. Show saved notes below the checklist and include them in email exports. Use a yellow Email button with teal text and border; omit the email status instructions.',
   'Current website: https://pythonidaer.github.io/traditional-checklist/'
 ];
 
@@ -24,6 +25,7 @@ function buildChecklistEmail() {
     done: row.querySelector('input[type="checkbox"]').checked,
     task: row.querySelector('input[type="text"]').value
   }));
+  const notes = document.querySelector('#notes-content').textContent;
   const emailRows = entries.map(entry =>
     '<tr><td width="56" align="center" style="padding:12px 8px;font-size:20px;vertical-align:middle;">' +
     (entry.done ? '&#9745;' : '&#9744;') +
@@ -36,31 +38,44 @@ function buildChecklistEmail() {
     '<div style="background:#ffda73;border-top:1px solid #002f35;border-bottom:1px solid #002f35;padding:12px 16px;font-family:Arial,sans-serif;font-size:38px;">HANGMAN</div>' +
     '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-top:30px;color:#002f35;"><thead><tr style="background:#002f35;color:#f3f0e4;"><th width="56" style="padding:6px;font-weight:normal;border-bottom:3px solid #cc3019;">Done</th><th style="padding:6px;font-weight:normal;border-bottom:3px solid #cc3019;">Task</th></tr></thead><tbody>' +
     emailRows + '</tbody></table>' +
+    (notes ? '<h2 style="font-size:20px;margin:28px 0 12px;">Notes</h2><p style="white-space:pre-wrap;line-height:1.5;">' + escapeEmailText(notes).replace(/\n/g, '<br>') + '</p>' : '') +
     '<h2 style="font-size:20px;margin:36px 0 12px;">Recreation rules</h2><ol style="padding-left:24px;font-size:14px;line-height:1.6;">' +
     recreationRules.map(rule => '<li style="margin-bottom:8px;">' + escapeEmailText(rule) + '</li>').join('') +
     '</ol></div>';
   const plain = 'Hat Trick\nHANGMAN\n\n' + entries.map(entry => (entry.done ? '[x] ' : '[ ] ') + entry.task).join('\n') +
-    '\n\nRecreation rules\n' + recreationRules.map((rule, index) => (index + 1) + '. ' + rule).join('\n');
+    (notes ? '\n\nNotes\n' + notes : '') + '\n\nRecreation rules\n' + recreationRules.map((rule, index) => (index + 1) + '. ' + rule).join('\n');
   return { html, plain };
 }
 
 document.querySelector('#email-checklist').addEventListener('click', async () => {
   const content = buildChecklistEmail();
-  const status = document.querySelector('#email-status');
   try {
     await navigator.clipboard.write([new ClipboardItem({
       'text/html': new Blob([content.html], { type: 'text/html' }),
       'text/plain': new Blob([content.plain], { type: 'text/plain' })
     })]);
-    status.textContent = 'Checklist copied. Paste into the email body, then send. If no email opens, open your mail app and use codefolio.work@gmail.com with subject re: Calling For Testcliff.';
     window.location.href = emailLink;
   } catch {
     document.querySelector('#email-preview').innerHTML = content.html;
     document.querySelector('#email-fallback').showModal();
-    status.textContent = 'Automatic copying is unavailable. Use the checklist preview to copy and paste.';
   }
 });
 document.querySelector('#open-email').href = emailLink;
 document.querySelector('#close-email-preview').addEventListener('click', () => {
   document.querySelector('#email-fallback').close();
+});
+
+const notesDialog = document.querySelector('#notes-dialog');
+const notesInput = document.querySelector('#notes-input');
+const notesContent = document.querySelector('#notes-content');
+document.querySelector('.puck-button').addEventListener('click', () => {
+  notesInput.value = notesContent.textContent;
+  notesDialog.showModal();
+});
+document.querySelector('.close-notes').addEventListener('click', () => notesDialog.close());
+document.querySelector('#notes-form').addEventListener('submit', event => {
+  event.preventDefault();
+  notesContent.textContent = notesInput.value;
+  document.querySelector('#saved-notes').hidden = !notesInput.value.trim();
+  notesDialog.close();
 });
