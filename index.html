@@ -16,10 +16,12 @@
     .heading-space { height: clamp(140px, 18vw, 230px); display: flex; align-items: flex-end; padding: 12px 5% 0; }
     .script-title { margin: 0; font-family: "Great Vibes", cursive; font-size: clamp(62px, 11vw, 132px); font-weight: 400; line-height: 1.2; color: var(--ink); }
     .band-title { margin: 0; padding-left: 5%; font-family: Arial, sans-serif; font-size: clamp(32px, 7.5vw, 88px); font-weight: 400; line-height: 1; text-transform: uppercase; position: relative; z-index: 1; }
-    .puck-button { position: absolute; width: 27%; right: 5%; top: 24%; z-index: 2; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
-    .puck-logo { display: block; width: 100%; height: auto; filter: drop-shadow(0 7px 0 #001d21); transition: transform 150ms, filter 150ms; }
-    .puck-button:hover .puck-logo { transform: translateY(-2px); filter: drop-shadow(0 9px 0 #001d21); }
-    .puck-button:active .puck-logo { transform: translateY(4px); filter: drop-shadow(0 3px 0 #001d21); }
+    .puck-button { position: absolute; width: 27%; right: 5%; bottom: -5px; z-index: 2; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    .puck-logo { display: block; width: 100%; height: auto; position: relative; z-index: 1; transition: transform 150ms; }
+    .puck-button::after { content: ""; position: absolute; width: 68%; height: clamp(8px, 1.1vw, 14px); bottom: -24px; left: 16%; border-radius: 50%; background: var(--red); opacity: .32; filter: blur(2px); transition: opacity 150ms, transform 150ms; }
+    .puck-button:hover::after { opacity: .5; transform: scaleX(1.06); }
+    .puck-button:hover .puck-logo { transform: translateY(-3px); }
+    .puck-button:active .puck-logo { transform: translateY(2px); }
     .blank-band { display: flex; align-items: center; height: clamp(72px, 10vw, 108px); background: var(--yellow); border-block: 1px solid var(--ink); position: relative; }
     .blank-band::after { content: ""; position: absolute; inset: 7px 0; border-block: 1px solid var(--paper); }
     .checklist { margin: 64px 4.5% 0; }
@@ -62,9 +64,19 @@
     .close-notes { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 28px; cursor: pointer; padding: 0 6px; }
     #notes-input { width: 100%; resize: vertical; min-height: 110px; padding: 10px; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-size: 16px; line-height: 1.5; }
     #notes-input:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-    .saved-notes { margin: 20px 4.5% 0; border-top: 1px solid var(--line); padding-top: 16px; }
+    .saved-notes { margin: 20px 4.5% 0; }
     .saved-notes h2 { font-size: 20px; font-weight: 400; margin: 0 0 10px; }
-    #notes-content { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; margin: 0; }
+    .note-row { display: grid; grid-template-columns: 90px minmax(0, 1fr); min-height: 49px; align-items: center; }
+    .note-controls { display: flex; align-items: center; justify-content: center; gap: 2px; }
+    .note-action { display: grid; place-items: center; width: 30px; height: 34px; padding: 6px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    .note-action:hover { background: var(--yellow); }
+    .note-action svg { width: 18px; height: 18px; fill: currentColor; }
+    .note-text { min-height: 39px; margin: 0 0 0 12px; padding: 6px 10px 2px; border-bottom: 1.5px solid var(--line); font-size: 18px; line-height: 30px; letter-spacing: .35px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    @media (max-width: 600px) {
+      .note-row { grid-template-columns: 62px minmax(0, 1fr); }
+      .note-action { width: 28px; }
+      .note-text { margin-left: 10px; padding-left: 5px; font-size: 16px; }
+    }
     @media (prefers-reduced-motion: reduce) { .puck-logo { transition: none; } }
   </style>
 </head>
@@ -73,7 +85,7 @@
     <header class="masthead">
       <div class="heading-space"><h1 class="script-title">Hat Trick</h1></div>
       <div class="blank-band"><p class="band-title">Hangman</p></div>
-      <button class="puck-button" type="button" aria-label="Edit notes" aria-haspopup="dialog" aria-controls="notes-dialog"><svg class="puck-logo" viewBox="4 5 40 28" role="img" aria-label="Hat Trick Hangman puck logo"><path d="M5 15v9c0 11 38 11 38 0v-9" fill="currentColor"/><ellipse cx="24" cy="15" rx="19" ry="9" fill="currentColor"/><path d="M9 16c8 6 22 6 30 0" fill="none" stroke="#f4f0e6" stroke-width="2"/></svg></button>
+      <button class="puck-button" type="button" aria-label="Add note" aria-haspopup="dialog" aria-controls="notes-dialog"><svg class="puck-logo" viewBox="4 5 40 28" role="img" aria-label="Hat Trick Hangman puck logo"><path d="M5 15v9c0 11 38 11 38 0v-9" fill="currentColor"/><ellipse cx="24" cy="15" rx="19" ry="9" fill="currentColor"/><path d="M9 16c8 6 22 6 30 0" fill="none" stroke="#f4f0e6" stroke-width="2"/></svg></button>
     </header>
     <div class="checklist">
   <table>
@@ -118,15 +130,15 @@
     </tfoot>
   </table>
     </div>
-    <section class="saved-notes" id="saved-notes" aria-labelledby="saved-notes-title" hidden><h2 id="saved-notes-title">Notes</h2><p id="notes-content"></p></section>
+    <section class="saved-notes" id="saved-notes" aria-labelledby="saved-notes-title" hidden><h2 id="saved-notes-title">Notes</h2><div id="notes-content"></div></section>
     <div class="email-actions">
       <button class="email-button" type="button" id="email-checklist">Email</button>
     </div>
   </main>
   <dialog id="notes-dialog" aria-labelledby="notes-title">
     <form id="notes-form">
-      <div class="notes-heading"><h2 id="notes-title">Notes</h2><button type="button" class="close-notes" aria-label="Close notes">×</button></div>
-      <textarea id="notes-input" aria-label="Checklist notes" rows="5" autofocus></textarea>
+      <div class="notes-heading"><h2 id="notes-title">Add note</h2><button type="button" class="close-notes" aria-label="Close notes">×</button></div>
+      <textarea id="notes-input" aria-label="Note" rows="5" autofocus></textarea>
       <div class="dialog-actions"><button type="submit" class="email-button">Save</button></div>
     </form>
   </dialog>
