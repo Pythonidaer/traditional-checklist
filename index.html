@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hat Trick Hangman Checklist</title>
+  <link rel="preload" href="fonts/great-vibes.ttf" as="font" type="font/ttf" crossorigin>
+
+  <style>
+    :root { color-scheme: light; --paper: #f3f0e4; --ink: #002f35; --line: #53797a; --yellow: #ffda73; --red: #cc3019; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Trebuchet MS", Arial, sans-serif; }
+    main { width: min(100%, 1100px); margin: 0 auto; padding-bottom: 64px; }
+    @font-face { font-family: "Great Vibes"; src: url("fonts/great-vibes.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+    .masthead { position: relative; }
+    .heading-space { height: clamp(140px, 18vw, 230px); display: flex; align-items: flex-end; padding: 12px 5% 0; }
+    .script-title { margin: 0; font-family: "Great Vibes", cursive; font-size: clamp(62px, 11vw, 132px); font-weight: 400; line-height: 1.2; color: var(--ink); }
+    .band-title { margin: 0; padding-left: 5%; font-family: Arial, sans-serif; font-size: clamp(32px, 7.5vw, 88px); font-weight: 400; line-height: 1; text-transform: uppercase; position: relative; z-index: 1; }
+    .puck-logo { position: absolute; width: 27%; height: auto; right: 5%; top: 24%; z-index: 2; color: var(--ink); }
+    .blank-band { display: flex; align-items: center; height: clamp(72px, 10vw, 108px); background: var(--yellow); border-block: 1px solid var(--ink); position: relative; }
+    .blank-band::after { content: ""; position: absolute; inset: 7px 0; border-block: 1px solid var(--paper); }
+    .checklist { margin: 64px 4.5% 0; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th:first-child { width: 90px; }
+    thead { background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--red); }
+    th { font-weight: 400; font-size: 25px; line-height: 1.3; padding: 3px 12px; text-align: center; }
+    tbody tr { height: 49px; }
+    td { padding: 0; }
+    td:first-child { text-align: center; vertical-align: middle; }
+    td:last-child { padding-left: 12px; }
+    input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 1px solid var(--ink); border-radius: 0; background: transparent; margin: 0; vertical-align: middle; cursor: pointer; display: inline-grid; place-content: center; }
+    input[type="checkbox"]:checked { background: var(--ink); }
+    input[type="checkbox"]:checked::after { content: ""; width: 5px; height: 10px; border: solid var(--paper); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+    input[type="text"] { display: block; width: 100%; height: 39px; padding: 6px 10px 2px; border: 0; border-bottom: 1.5px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); font: inherit; font-size: 18px; letter-spacing: .35px; }
+    .add-row { margin: 3px auto; display: grid; place-items: center; width: 44px; height: 44px; padding: 10px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    .add-row:hover { background: var(--yellow); }
+    .add-row svg { width: 24px; height: 24px; fill: currentColor; }
+    tr:has(input[type="checkbox"]:checked) input[type="text"] { text-decoration: line-through; }
+    input:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+    @media (max-width: 600px) {
+      .checklist { margin-top: 42px; }
+      th:first-child { width: 62px; }
+      th { font-size: 21px; }
+      td:last-child { padding-left: 10px; }
+      input[type="text"] { font-size: 16px; padding-left: 5px; }
+    }
+
+    .email-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 12px; margin: 24px 4.5% 0; }
+    .email-button { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); padding: 11px 20px; font: inherit; cursor: pointer; }
+    .email-button:hover { background: #15464b; }
+    .email-help { max-width: 360px; margin: 0; font-size: 14px; line-height: 1.5; text-align: right; }
+    dialog { width: min(680px, calc(100% - 32px)); max-height: 85vh; padding: 24px; background: var(--paper); color: var(--ink); border: 1px solid var(--ink); }
+    dialog::backdrop { background: rgb(0 0 0 / .5); }
+    .dialog-actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 20px; }
+    .dialog-actions a { color: var(--ink); }
+    @media print { .email-actions, tfoot, dialog { display: none; } }
+  </style>
+</head>
+<body>
+  <main aria-label="Checklist">
+    <header class="masthead">
+      <div class="heading-space"><h1 class="script-title">Hat Trick</h1></div>
+      <div class="blank-band"><p class="band-title">Hangman</p></div>
+      <svg class="puck-logo" viewBox="4 5 40 28" role="img" aria-label="Hat Trick Hangman puck logo"><path d="M5 15v9c0 11 38 11 38 0v-9" fill="currentColor"/><ellipse cx="24" cy="15" rx="19" ry="9" fill="currentColor"/><path d="M9 16c8 6 22 6 30 0" fill="none" stroke="#f4f0e6" stroke-width="2"/></svg>
+    </header>
+    <div class="checklist">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Done</th>
+        <th scope="col">Task</th>
+      </tr>
+    </thead>
+    <tbody>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 1 done"></td>
+        <td><input type="text" aria-label="Task 1"></td>
+      </tr>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 2 done"></td>
+        <td><input type="text" aria-label="Task 2"></td>
+      </tr>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 3 done"></td>
+        <td><input type="text" aria-label="Task 3"></td>
+      </tr>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 4 done"></td>
+        <td><input type="text" aria-label="Task 4"></td>
+      </tr>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 5 done"></td>
+        <td><input type="text" aria-label="Task 5"></td>
+      </tr>
+<tr>
+        <td><input type="checkbox" aria-label="Mark task 6 done"></td>
+        <td><input type="text" aria-label="Task 6"></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr><td>
+        <button class="add-row" type="button" aria-label="Add task" title="Add task">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </button>
+      </td><td></td></tr>
+    </tfoot>
+  </table>
+    </div>
+    <div class="email-actions">
+      <button class="email-button" type="button" id="email-checklist">Email</button>
+      <p class="email-help" id="email-status" role="status" aria-live="polite">Copies the styled checklist and opens an email. Paste into the body, then send.</p>
+    </div>
+  </main>
+  <dialog id="email-fallback" aria-labelledby="email-fallback-title">
+    <h2 id="email-fallback-title">Copy your checklist</h2>
+    <p>Automatic copying is unavailable. Select and copy the checklist below, then open your email and paste it into the body.</p>
+    <div id="email-preview"></div>
+    <div class="dialog-actions">
+      <a id="open-email" href="mailto:codefolio.work@gmail.com?subject=re%3A%20Calling%20For%20Testcliff">Open email</a>
+      <button class="email-button" type="button" id="close-email-preview">Close</button>
+    </div>
+  </dialog>
+<script>
+  const rows = document.querySelector('tbody');
+  document.querySelector('.add-row').addEventListener('click', () => {
+    const number = rows.rows.length + 1;
+    const row = rows.insertRow();
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.setAttribute('aria-label', 'Mark task ' + number + ' done');
+    const task = document.createElement('input');
+    task.type = 'text';
+    task.setAttribute('aria-label', 'Task ' + number);
+    row.insertCell().append(checkbox);
+    row.insertCell().append(task);
+    task.focus();
+  });
+</script>
+<script src="email.js"></script>
+</body>
+</html>
